@@ -62,6 +62,9 @@
   html.public-mode .public-controls{display:flex;justify-content:center;margin:22px 0 2px;visibility:visible !important}
   html.public-mode .public-controls .controls{display:flex !important;visibility:visible !important;opacity:1 !important}
   html.public-mode #screenPills{margin-top:14px !important}
+  /* Public view: only the screens in the final design exist — Home, Now Playing, Playing Next.
+     Listen Now / Library / Browse / Years / Episode List / Saved / Downloaded are not car screens. */
+  html.public-mode #screenPills button[data-view="listennow"],html.public-mode #screenPills button[data-view="library"],html.public-mode #screenPills button[data-view="browse"],html.public-mode #screenPills button[data-view="years"],html.public-mode #screenPills button[data-view="episodes"],html.public-mode #screenPills button[data-view="saved"],html.public-mode #screenPills button[data-view="downloaded"]{display:none !important}
   html.public-mode .wrap{padding-bottom:56px}
   @media(max-width:640px){ html.public-mode .public-header{padding-top:32px} html.public-mode .public-header p{font-size:16.5px} html.public-mode .car-wrap{padding:14px;border-radius:22px} html.public-mode .seg button{padding:9px 12px;font-size:13.5px} }
   /* header */
@@ -1101,6 +1104,14 @@ if (document.documentElement.classList.contains('public-mode')) {
   });
   var headText = document.querySelector('#prototype .section-head > div:first-child');
   if (headText) headText.remove();
+  /* Public view: keep only the screens that exist in the final design —
+     Home, Now Playing, Playing Next. The tab-era screens (Listen Now,
+     Library, Browse) and the Home sub-views (Years, Episode List, Saved,
+     Downloaded) are not separate car screens, so their pills go. */
+  ['listennow','library','browse','years','episodes','saved','downloaded'].forEach(function (v) {
+    var b = document.querySelector('#screenPills button[data-view="' + v + '"]');
+    if (b) b.remove();
+  });
   /* Public visitors must be able to switch platforms: move the CarPlay /
      Android Auto toggle down with the other public controls (the screen
      pills below the demo), where it is clearly visible. Same element, same
