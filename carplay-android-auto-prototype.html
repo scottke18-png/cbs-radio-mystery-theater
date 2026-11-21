@@ -42,6 +42,15 @@
   html.public-mode .public-header h1{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display","Helvetica Neue",Helvetica,Arial,sans-serif;font-size:clamp(32px,5.2vw,48px);line-height:1.08;letter-spacing:-.022em;font-weight:700;color:#1d1d1f}
   .public-header p{font-size:17px;color:var(--ink2);margin:10px 0 0;line-height:1.55}
   html.public-mode .public-header p{font-size:19px;color:#6e6e73;margin:14px auto 0;line-height:1.5;max-width:640px;font-weight:400;letter-spacing:-.01em}
+  /* Public-only back link to the main site — sits at the very top of the page,
+     left-aligned with the page content, above the public header. Hidden in
+     internal mode. Apple-style: blue text link, chevron + "Back", no box. */
+  .public-back{display:none}
+  html.public-mode .public-back{display:inline-flex;align-items:center;color:#0071e3;text-decoration:none;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display","Helvetica Neue",Helvetica,Arial,sans-serif;font-size:17px;line-height:1.2;padding:10px 14px 10px 2px;margin:10px 0 0 -2px;min-height:44px;-webkit-tap-highlight-color:transparent}
+  html.public-mode .public-back:hover{color:#0077ed;text-decoration:underline;text-underline-offset:3px}
+  html.public-mode .public-back:focus-visible{outline:2px solid #0071e3;outline-offset:2px;border-radius:6px}
+  .public-back .back-chev{font-size:28px;line-height:1;font-weight:300;transform:translateY(-1px);margin-right:3px}
+  html.public-mode .public-header{padding-top:18px}
   html.public-mode #prototype .controls{justify-content:center}
   html.public-mode .seg{background:#ffffff;border:1px solid #d2d2d7;box-shadow:0 1px 4px rgba(0,0,0,.06);padding:4px}
   html.public-mode .seg button{color:#424245;font-family:inherit}
@@ -62,7 +71,7 @@
   html.public-mode .public-controls{display:flex;justify-content:center;margin:22px 0 2px;visibility:visible !important}
   html.public-mode .public-controls .controls{display:flex !important;visibility:visible !important;opacity:1 !important}
   html.public-mode #screenPills{margin-top:14px !important}
-  /* Public view: only the screens in the final design exist — Home, Now Playing, Playing Next.
+  /* Public view: only the screens in the final design exist — Home, Now Playing.
      Listen Now / Library / Browse / Years / Episode List / Saved / Downloaded are not car screens. */
   html.public-mode #screenPills button[data-view="listennow"],html.public-mode #screenPills button[data-view="library"],html.public-mode #screenPills button[data-view="browse"],html.public-mode #screenPills button[data-view="years"],html.public-mode #screenPills button[data-view="episodes"],html.public-mode #screenPills button[data-view="saved"],html.public-mode #screenPills button[data-view="downloaded"]{display:none !important}
   html.public-mode .wrap{padding-bottom:56px}
@@ -352,6 +361,7 @@
 </head>
 <body>
 <div class="wrap">
+  <a class="public-back" href="index.html" aria-label="Back to the main site"><span class="back-chev" aria-hidden="true">‹</span>Back</a>
   <header class="public-header">
     <h1>CBS Radio Mystery Theater — in the car</h1>
     <p>An interactive preview of the CarPlay and Android Auto experience now in development.</p>
@@ -430,7 +440,6 @@
       <button data-view="saved" onclick="go('saved')">Saved</button>
       <button data-view="downloaded" onclick="go('downloaded')">Downloaded</button>
       <button data-view="nowplaying" onclick="openNP()">Now Playing</button>
-      <button data-view="playingnext" onclick="go('playingnext')">Playing Next</button>
     </div>
   </section>
 
@@ -454,7 +463,7 @@
       <div class="card"><span class="mono">CarPlay: CPListTemplate · Auto: browse nodes [years] [saved] [downloaded]</span><h3>3. Library — three rows</h3><p>One list, Podcasts-Library style, exactly three rows: <b>Years</b> (opens 1974–1982, then that year's episodes), <b>Saved</b> (the user's favorites — Podcasts' word), <b>Downloaded</b> (offline episodes).</p><ul><li>Empty states stay as rows: “No saved episodes yet” — never hide a row</li><li>Android Auto mirrors the same order in its browse tree: Listen Now content first, then Years, Saved, Downloaded</li></ul></div>
       <div class="card"><span class="mono">CarPlay: CPListTemplate with featured items · Auto: curation stays on the phone</span><h3>4. Browse — curated</h3><p>Modeled on Podcasts' Browse. Two featured entries with artwork: <b>This Week in Theater History</b> (the episode that aired this calendar week in the original run) and <b>Hidden Gems</b> (curated picks), then a short Editor's Picks episode list.</p><ul><li>Featured entries are computed on the phone from catalog air dates — the car only renders rows</li><li>Keep it short: 2 featured entries + a handful of picks, never a wall of episodes</li></ul></div>
       <div class="card"><span class="mono">CarPlay: CPListTemplate → CPListItem (artwork + text) · Auto: browse nodes [years] / [year/{year}]</span><h3>5. Years → Episode List</h3><p>From Library → Years: one row per season year, 1974–1982, chronological, 1974 first. Tapping a year pushes that year's episodes: each episode's own artwork thumbnail, title, air date + runtime as subtitle. Downloaded episodes get a badge.</p><ul><li>Artwork: <code>Assets/Artwork/Episodes/ep%04d.webp</code> by episode number; <code>paletteHex</code> from catalog.json is the fallback tile color</li><li>Cap the rendered list (paginate / window) — some cars show as few as 12 rows; never hand the car 200+ rows at once</li><li>No synopsis text in this list's rows — title + date only (short synopses live in the Home screen's episode list — card 1) · Sort: episode number ascending</li></ul></div>
-      <div class="card"><span class="mono">CarPlay: CPNowPlayingTemplate · Auto: MediaSession + custom actions</span><h3>6. Now Playing</h3><p>Scott's mockup layout: header with a back chevron “‹” at top-left and the app name “Radio Theater” at top-right. Large artwork at RIGHT — that episode's own <code>ep%04d.webp</code> file, roughly the right third of the screen. Background: the background is the episode artwork, blurred and darkened, matching what CarPlay itself does with supplied artwork — the same artwork file fills the whole screen edge to edge (top included), scaled up well past the edges and heavily blurred into a soft wash of its own colors, under a strong black overlay (about 60%) so the screen stays deep and moody and all white text and icons stay legible; it swaps automatically when the episode changes and is one continuous surface with no seams, lines, or bands. Title, host line (“E. G. Marshall”), and show line (“CBS Radio Mystery Theater”) stacked at LEFT and center-aligned within that text area, with the transport centered beneath the text block. The progress bar runs across the BOTTOM: elapsed at far left, remaining (with minus sign) at far right. Reached via the system Now Playing button, never from a menu of ours.</p><ul><li>Transport: −15s, Play/Pause, +30s (asymmetric, as in the mockup), centered under the text block — rendered as bare white icons directly on the background, no button circles or filled backgrounds, matching the phone app; the skip icons are a curved arrow wrapping around the number (15 / 30)</li><li><b>Previous / Next Episode buttons at the bottom corners</b>, beneath the progress bar: skip-to-previous icon + two-line “Previous / Episode” label at far left; “Next / Episode” label + skip-to-next icon at far right. Tapping moves through the episode list and updates artwork, title, blurred artwork background, and progress. The same actions also stay on the steering-wheel controls</li><li>No swipe: CarPlay and Android Auto templates don't support swipe-to-change-episode — prev/next must be tappable targets, not gestures</li><li>Speed: turtle / rabbit stepper bottom-center, beneath the progress bar — turtle steps down, rabbit steps up, current rate shown between them (0.75× · 1× · 1.25× · 1.5× · 2×) — the same control as the phone app, drawn the same way: bare white turtle and rabbit icons on the background, no button circles</li><li><b>No Save or “Playing Next” pills on the Now Playing face</b> — the mockup has neither. The queue (“Playing Next”) remains its own list screen, reached from the lists rather than from this face</li><li>Saved state must match the phone app instantly</li></ul></div>
+      <div class="card"><span class="mono">CarPlay: CPNowPlayingTemplate · Auto: MediaSession + custom actions</span><h3>6. Now Playing</h3><p>Scott's mockup layout: header with a back chevron “‹” at top-left and the app name “Radio Theater” at top-right. Large artwork at RIGHT — that episode's own <code>ep%04d.webp</code> file, roughly the right third of the screen. Background: the background is the episode artwork, blurred and darkened, matching what CarPlay itself does with supplied artwork — the same artwork file fills the whole screen edge to edge (top included), scaled up well past the edges and heavily blurred into a soft wash of its own colors, under a strong black overlay (about 60%) so the screen stays deep and moody and all white text and icons stay legible; it swaps automatically when the episode changes and is one continuous surface with no seams, lines, or bands. Title, host line (“E. G. Marshall”), and show line (“CBS Radio Mystery Theater”) stacked at LEFT and center-aligned within that text area, with the transport centered beneath the text block. The progress bar runs across the BOTTOM: elapsed at far left, remaining (with minus sign) at far right. Reached via the system Now Playing button, never from a menu of ours.</p><ul><li>Transport: −15s, Play/Pause, +30s (asymmetric, as in the mockup), centered under the text block — rendered as bare white icons directly on the background, no button circles or filled backgrounds, matching the phone app; the skip icons are a curved arrow wrapping around the number (15 / 30)</li><li><b>Previous / Next Episode buttons at the bottom corners</b>, beneath the progress bar: skip-to-previous icon + two-line “Previous / Episode” label at far left; “Next / Episode” label + skip-to-next icon at far right. Tapping moves through the episode list and updates artwork, title, blurred artwork background, and progress. The same actions also stay on the steering-wheel controls</li><li>No swipe: CarPlay and Android Auto templates don't support swipe-to-change-episode — prev/next must be tappable targets, not gestures</li><li>Speed: turtle / rabbit stepper bottom-center, beneath the progress bar — turtle steps down, rabbit steps up, current rate shown between them (0.75× · 1× · 1.25× · 1.5× · 2×) — the same control as the phone app, drawn the same way: bare white turtle and rabbit icons on the background, no button circles</li><li><b>No Save or “Playing Next” pills on the Now Playing face</b> — the mockup has neither. There is no Playing Next / queue screen in the car design; the queue is not surfaced in the car at all, and playback simply continues through the episode list via the Previous/Next Episode controls</li><li>Saved state must match the phone app instantly</li></ul></div>
       <div class="card"><span class="mono">System-provided — do not build a custom one</span><h3>7. Voice &amp; Lock-Screen Parity</h3><p>Car, lock screen, and headphones all drive the <i>same</i> media session. If it works on the lock screen, it must work in the car.</p><ul><li>Support: play, pause, next/prev track, seek −15s/+30s, seek to position</li><li>Media metadata: title, “CBS Radio Mystery Theater”, year, artwork, duration</li></ul></div>
     </div>
   </section>
@@ -880,16 +889,13 @@ function railHTML(){
 }
 function navBarHTML(){
   if(state.view==='nowplaying'){
-    return '<button class="backbtn np-back" onclick="goBack()" aria-label="Back">‹</button><span class="np-appname">Radio Theater</span>';
-  }
-  if(state.view==='playingnext'){
-    return '<button class="backbtn" onclick="go(\'nowplaying\')">‹ Now Playing</button><span class="navtitle">Playing Next</span>';
+    return '<button class="backbtn np-back" onclick="goBack()" aria-label="Back to Home">‹</button><span class="np-appname">Radio Theater</span>';
   }
   return '<button class="npbtn'+(state.playing?' live':'')+'" onclick="openNP()" aria-label="Now Playing"><span></span><span></span><span></span></button>';
 }
 function backLabel(){ var names={home:'Home',listennow:'Listen Now',library:'Library',browse:'Browse',years:'Years',episodes:'Episodes',saved:'Saved',downloaded:'Downloaded'}; return names[state.fromView]||'Home'; }
-function goBack(){ go(state.fromView||'home'); }
-function openNP(){ if(state.view!=='nowplaying'&&state.view!=='playingnext') state.fromView=state.view; state.view='nowplaying'; render(); }
+function goBack(){ go('home'); }
+function openNP(){ if(state.view!=='nowplaying') state.fromView=state.view; state.view='nowplaying'; render(); }
 function libRow(tile,cls,title,sub,view){
   return '<button class="row" onclick="go(\''+view+'\')"><span class="art '+cls+'">'+tile+'</span><span class="row-main"><span class="row-title">'+title+'</span><span class="row-sub" style="display:block">'+sub+'</span></span><span class="chev">›</span></button>';
 }
@@ -901,7 +907,7 @@ function contRowHTML(ep,elapsed){
   var left=Math.max(1,Math.round((ep.sec-elapsed)/60));
   return '<button class="row" onclick="playAt('+ep.n+','+elapsed+')">'+artHTML(ep)+'<span class="row-main"><span class="row-title">#'+ep.n+' · '+ep.t+'</span><span class="rowprog"><i style="width:'+pct+'%"></i></span><span class="row-sub" style="display:block">'+left+' min left · '+ep.d+'</span></span><span class="chev">›</span></button>';
 }
-function playAt(n,elapsed){ if(state.view!=='nowplaying'&&state.view!=='playingnext') state.fromView=state.view; state.ep=findEp(n); state.elapsed=elapsed; state.playing=true; state.view='nowplaying'; startTimer(); render(); }
+function playAt(n,elapsed){ if(state.view!=='nowplaying') state.fromView=state.view; state.ep=findEp(n); state.elapsed=elapsed; state.playing=true; state.view='nowplaying'; startTimer(); render(); }
 function prevEpObj(){ var list=epsFor(state.year); var idx=list.indexOf(state.ep); return list[(idx-1+list.length)%list.length]; }
 function nextEpObj(){ var list=epsFor(state.year); var idx=list.indexOf(state.ep); return list[(idx+1)%list.length]; }
 function prevEp(){ state.ep=prevEpObj(); state.elapsed=0; state.playing=true; startTimer(); render(); }
@@ -1056,16 +1062,6 @@ function render(){
       +'</div></div>';
     note='<b>Now Playing — '+plat+':</b> Scott\u2019s mockup layout, polished: big artwork at RIGHT; background is the episode artwork, blurred and darkened, matching what CarPlay itself does with supplied artwork \u2014 the same artwork file fills the whole screen edge to edge (top included), scaled up well past the edges and heavily blurred into a soft wash of its own colors, under a strong black overlay (about 60%) so the screen stays deep and moody and white text/icons stay legible, as one continuous surface with no seams; title / host / show center-aligned in the text area at left, with the \u221215s \u00b7 pause \u00b7 +30s transport centered beneath the text \u2014 all bare white icons directly on the background, no button circles, matching the phone app (the skip icons are a curved arrow wrapping around the 15 / 30). The progress bar runs across the BOTTOM \u2014 elapsed at far left, remaining (with minus sign) at far right \u2014 and beneath it the episode row: labeled <b>Previous Episode</b> and <b>Next Episode</b> buttons at the bottom corners, and the turtle / rabbit speed stepper bottom-center (0.75\u00d7\u20132\u00d7, current rate shown between the animals) \u2014 the turtle and rabbit are bare white icons too, no circles, same as the phone app. Tapping Previous/Next moves through the year\u2019s episodes and updates artwork, title, blurred artwork background, and progress. No Save or Playing Next pills on this face \u2014 the mockup has neither. No swipe in the car templates \u2014 episode changes are taps (these buttons, or steering-wheel next/previous), never a gesture. Header: \u201c\u2039\u201d back chevron at top-left, \u201cRadio Theater\u201d at top-right.';
   }
-  if(state.view==='playingnext'){
-    var qlist=epsFor(state.year); var qidx=qlist.indexOf(state.ep);
-    var q=qlist.slice(qidx+1).concat(qlist.slice(0,Math.max(0,qidx)));
-    m.innerHTML='<div class="rows"><div class="sect">Now Playing</div>'
-      +'<button class="row" onclick="go(\'nowplaying\')">'+artHTML(state.ep)+'<span class="row-main"><span class="row-title">#'+state.ep.n+' · '+state.ep.t+'</span><span class="row-sub" style="display:block">'+fmt(state.elapsed)+' elapsed · '+fmt(state.ep.sec-state.elapsed)+' left</span></span><span class="eq"><span></span><span></span><span></span></span></button>'
-      +'<div class="sect">Playing Next</div>'
-      + (q.length ? q.map(function(e){return rowHTML(e);}).join('') : '<div class="sect" style="text-transform:none;letter-spacing:0;font-size:13px">Queue is empty — this is the last episode in '+state.year+'.</div>')
-      +'</div>';
-    note='<b>Playing Next — '+plat+':</b> '+(state.platform==='carplay'?'A CPListTemplate pushed from Now Playing via the "Playing Next" button — the only template CarPlay allows over CPNowPlayingTemplate.':'The queue as a list, pushed over the player.')+' Tapping any row jumps the queue to that episode.';
-  }
   var specEl = document.getElementById('specNote'); if (specEl) specEl.innerHTML = note;
   var pills=document.querySelectorAll('#screenPills button');
   pills.forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-view')===state.view); });
@@ -1073,8 +1069,8 @@ function render(){
 function go(view){ state.view=view; render(); }
 function pickYear(y){ state.year=y; state.view='episodes'; render(); }
 function findEp(n){ for(var y in EPISODES){ for(var i=0;i<EPISODES[y].length;i++){ if(EPISODES[y][i].n===n){ state.year=+y; return EPISODES[y][i]; } } } return EPISODES[1974][0]; }
-function playEp(n){ if(state.view!=='nowplaying'&&state.view!=='playingnext') state.fromView=state.view; state.ep=findEp(n); state.elapsed=0; state.playing=true; state.view='nowplaying'; startTimer(); render(); }
-function resume(){ if(state.view!=='nowplaying'&&state.view!=='playingnext') state.fromView=state.view; state.playing=true; state.view='nowplaying'; startTimer(); render(); }
+function playEp(n){ if(state.view!=='nowplaying') state.fromView=state.view; state.ep=findEp(n); state.elapsed=0; state.playing=true; state.view='nowplaying'; startTimer(); render(); }
+function resume(){ if(state.view!=='nowplaying') state.fromView=state.view; state.playing=true; state.view='nowplaying'; startTimer(); render(); }
 function togglePlay(){ state.playing=!state.playing; if(state.playing) startTimer(); else stopTimer(); render(); }
 function skip(d){ state.elapsed=Math.min(state.ep.sec-1, Math.max(0, state.elapsed+d)); render(); }
 function nextEp(){ state.ep=nextEpObj(); state.elapsed=0; state.playing=true; startTimer(); render(); }
@@ -1105,10 +1101,10 @@ if (document.documentElement.classList.contains('public-mode')) {
   var headText = document.querySelector('#prototype .section-head > div:first-child');
   if (headText) headText.remove();
   /* Public view: keep only the screens that exist in the final design —
-     Home, Now Playing, Playing Next. The tab-era screens (Listen Now,
+     Home, Now Playing. The tab-era screens (Listen Now,
      Library, Browse) and the Home sub-views (Years, Episode List, Saved,
      Downloaded) are not separate car screens, so their pills go. */
-  ['listennow','library','browse','years','episodes','saved','downloaded'].forEach(function (v) {
+  ['listennow','library','browse','years','episodes','saved','downloaded','playingnext'].forEach(function (v) {
     var b = document.querySelector('#screenPills button[data-view="' + v + '"]');
     if (b) b.remove();
   });
